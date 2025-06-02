@@ -3,91 +3,94 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Desarrollo Seguro</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: monospace;
-      background-color: #0f0f0f;
-      color: #00ff88;
-      line-height: 1.6;
-    }
-    header, footer {
-      background-color: #0a0a0a;
-      padding: 1rem;
-      text-align: center;
-    }
-    main {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    a.button {
-      display: inline-block;
-      margin: 1rem auto;
-      padding: 0.75rem 1.5rem;
-      background-color: #00ff88;
-      color: #0f0f0f;
-      text-decoration: none;
-      font-weight: bold;
-      border-radius: 5px;
-      text-align: center;
-    }
-    a.button:hover {
-      background-color: #00cc6f;
-    }
-    section {
-      margin-bottom: 2rem;
-    }
-  </style>
+  <title>Desarrollo Seguro - Snake Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <header>
-    <h1>🔐 Desarrollo Seguro</h1>
-    <p>Buenas prácticas y seguridad en el desarrollo de software</p>
-  </header>
+<body class="bg-gray-900 text-white flex flex-col items-center justify-center min-h-screen p-4">
 
-  <main>
-    <section id="bienvenida">
-      <h2>Bienvenido</h2>
-      <p>
-        Este sitio está dedicado a promover la seguridad desde la fase de desarrollo. Aquí encontrarás recursos, guías, herramientas y consejos para escribir código más seguro.
-      </p>
-    </section>
+  <h1 class="text-4xl md:text-6xl font-bold mb-6 text-center text-cyan-400 drop-shadow-lg">
+    👷🏼👷🏼‍♂️ Estamos construyendo. Mientras...
+  </h1>
 
-    <section id="sobremi">
-      <h2>Sobre mí</h2>
-      <p>
-        Soy Alejandro, desarrollador apasionado por la ciberseguridad. A través de este espacio comparto mis aprendizajes, proyectos y reflexiones sobre cómo escribir software que sea funcional y seguro desde su concepción.
-      </p>
-    </section>
+  <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl">
+    <canvas id="game" width="400" height="400" class="bg-black border-4 border-cyan-400 rounded-lg"></canvas>
+    <p class="text-center mt-4 text-gray-300">Usa las flechas del teclado para mover la serpiente 🐍</p>
+  </div>
 
-    <section id="recursos">
-      <h2>Recursos útiles</h2>
-      <ul>
-        <li><a href="https://owasp.org/">OWASP Foundation</a></li>
-        <li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheets</a></li>
-        <li><a href="https://github.com/">Repositorio GitHub</a></li>
-      </ul>
-    </section>
+  <script>
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
 
-    <section id="contacto">
-      <h2>Contacto</h2>
-      <p>
-        ¿Querés colaborar, sugerir contenido o tenés dudas sobre desarrollo seguro? Podés escribirme a <strong>alejandro@desarrolloseguro.com</strong>
-      </p>
-    </section>
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
 
-    <div style="text-align: center;">
-      <a href="https://github.com/" class="button">Ver en GitHub</a>
-    </div>
-  </main>
+    let snake = [{ x: 10, y: 10 }];
+    let food = { x: 5, y: 5 };
+    let dx = 0;
+    let dy = 0;
+    let score = 0;
 
-  <footer>
-    <p>&copy; 2025 Desarrollo Seguro | Todos los derechos reservados</p>
-  </footer>
+    function draw() {
+      ctx.fillStyle = "black";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Draw food
+      ctx.fillStyle = "lime";
+      ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+
+      // Move snake
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+      snake.unshift(head);
+
+      // Eat food
+      if (head.x === food.x && head.y === food.y) {
+        food = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount),
+        };
+        score++;
+      } else {
+        snake.pop();
+      }
+
+      // Draw snake
+      ctx.fillStyle = "cyan";
+      snake.forEach((part, index) => {
+        ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 1, gridSize - 1);
+      });
+
+      // Check collisions
+      if (
+        head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount ||
+        snake.slice(1).some(p => p.x === head.x && p.y === head.y)
+      ) {
+        alert("¡Juego terminado! Tu puntuación: " + score);
+        // Reset game
+        snake = [{ x: 10, y: 10 }];
+        dx = 0;
+        dy = 0;
+        score = 0;
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      switch (e.key) {
+        case "ArrowUp":
+          if (dy === 0) { dx = 0; dy = -1; }
+          break;
+        case "ArrowDown":
+          if (dy === 0) { dx = 0; dy = 1; }
+          break;
+        case "ArrowLeft":
+          if (dx === 0) { dx = -1; dy = 0; }
+          break;
+        case "ArrowRight":
+          if (dx === 0) { dx = 1; dy = 0; }
+          break;
+      }
+    });
+
+    setInterval(draw, 100);
+  </script>
 </body>
 </html>
